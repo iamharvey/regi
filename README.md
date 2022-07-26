@@ -1,4 +1,10 @@
 # regi
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/iamharvey/regi)](https://goreportcard.com/report/github.com/iamharvey/regi) 
+[![GoDoc](https://godoc.org/github.com/iamharvey/regi?status.svg)](https://godoc.org/github.com/iamharvey/regi)
+
+
+
 regi is a CLI tool for managing your accessibility to multiple Docker registries.
 
 <br>
