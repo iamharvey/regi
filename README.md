@@ -274,6 +274,12 @@ image golang:1.17 is deleted
 
 <br><br>
 
+## Limitation
+
+Regi is currently only support standard Docker registry. It is not tested with customized Docker registries (e.g., JFrog virtual Docker registry) or non Docker registries. Feel free to post issues or contribute.
+
+<br><br>
+
 ## License
 
 MIT License
