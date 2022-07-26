@@ -1,8 +1,35 @@
 # regi
-regi is a CLI tool for private docker registry
-
+regi is a CLI tool for managing your accessibility to multiple Docker registries.
 
 <br>
+
+## Features
+
+Context management:
+- [x] List all the contexts;
+- [x] Add a new context (new connection settings);
+- [x] Get info about a context;
+- [x] Set current context.
+
+Login
+- [x] Login to current registry.
+
+Image
+- [x] List all the images with/without tags;
+- [x] Tag & push local image to remote registry;
+- [x] Pull image from remote registry;
+- [x] Delete specific versions of an image from remote registry;
+- [ ] Delete image repository from remote registry;
+
+more features are coming ...
+
+<br>
+
+## How-To
+
+(TODO)
+
+<br><br>
 
 ## License
 

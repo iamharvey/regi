@@ -1,0 +1,13 @@
+registries:
+  - name: jc-registry
+    server: http://192.168.0.168:5000
+    insecure-skip-tls-verify: false
+    user:
+    password:
+  - name: jc-registry-2
+    server: https://192.168.0.168:5000
+    insecure-skip-tls-verify: true
+    user: noname
+    password: fakepass
+current: jc-registry
+
