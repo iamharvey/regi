@@ -132,9 +132,6 @@ func (db *DB) Set(name string) error {
 // Add new registry to the context list.
 func (db *DB) Add(name, server, user, password string, skip bool) (bool, error) {
 	keyPath, err := db.GetPath(keyRegistries)
-	if err != nil {
-		return false, err
-	}
 
 	var registries []interface{}
 	if keyPath != nil {
