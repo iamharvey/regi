@@ -1,23 +1,19 @@
 package command
 
 import (
-	"bytes"
 	"github.com/iamharvey/regi/internal/pkg/io"
 	"github.com/stretchr/testify/assert"
-	"log"
 	"os"
 	"testing"
 )
 
 func TestCmdContext(t *testing.T) {
-	var buf bytes.Buffer
-	log.SetOutput(&buf)
-
 	streams := io.Streams{In: os.Stdin, Out: os.Stdout, ErrOut: os.Stderr}
 	ctxCmd := NewCmdContext(streams)
+	assert.NotNil(t, ctxCmd)
 
 	// Add test.
-	_, err := executeCommand(ctxCmd, "add", "-n=context-123", "-s=http://localhost:5000")
+	_, err := executeCommand(ctxCmd, "add", "-n=context-123", "-s=http://localhost:5000", "-u=regi", "-p=regi")
 	assert.NoError(t, err)
 
 	// Set test.
