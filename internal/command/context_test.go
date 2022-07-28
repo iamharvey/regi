@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestNewCmdContext(t *testing.T) {
+func TestCmdContext(t *testing.T) {
 	var buf bytes.Buffer
 	log.SetOutput(&buf)
 
@@ -17,7 +17,7 @@ func TestNewCmdContext(t *testing.T) {
 	ctxCmd := NewCmdContext(streams)
 
 	// Add test.
-	_, err := executeCommand(ctxCmd, "add", "-n=context-123", "-s=http://192.168.0.168:5000")
+	_, err := executeCommand(ctxCmd, "add", "-n=context-123", "-s=http://localhost:5000")
 	assert.NoError(t, err)
 
 	// Set test.
