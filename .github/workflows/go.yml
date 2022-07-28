@@ -23,6 +23,8 @@ jobs:
 
     - name: Test
       run: |
+        docker run -d --name registry -e REGISTRY_HTTP_ADDR=0.0.0.0:5000 -e REGISTRY_STORAGE_DELETE_ENABLED=true -p 5000:5000 registry:2
+        sleep 10
         go test -race -coverprofile=coverage.txt -covermode=atomic ./...
 
     - name: Upload coverage to Codecov
