@@ -29,7 +29,7 @@ Image
 - [x] Tag & push local image to remote registry;
 - [x] Pull image from remote registry;
 - [x] Delete specific versions of an image from remote registry;
-- [ ] Delete image repository from remote registry;
+- [x] Delete image repository from remote registry;
 
 more features are coming ...
 
