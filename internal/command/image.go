@@ -17,7 +17,7 @@ const (
 	msgShortImageCmd = "Pull, push, delete and list images over Docker registry"
 
 	// msgShortImageListCmd is the short version description for 'image list' command.
-	msgShortImgListCmd = "List images on current registry."
+	msgShortImgListCmd = "ListContexts images on current registry."
 
 	// msgShortImgPullCmd is the short version description for 'image pull' command.
 	msgShortImgPullCmd = "Pull image from current registry."
@@ -26,7 +26,7 @@ const (
 	msgShortImgPushCmd = "Push image to current registry."
 
 	// msgShortImgDelCmd is the short version description for 'image delete' command.
-	msgShortImgDelCmd = "Delete image from current registry."
+	msgShortImgDelCmd = "DeleteContext image from current registry."
 
 	// termDelSuccess is the key term for successful deletion operation.
 	termDelSuccess = "202 accepted"
@@ -68,7 +68,7 @@ func NewCmdImage(streams rio.Streams) *cobra.Command {
 		Short:                 msgShortImageCmd,
 	}
 
-	// List all the contexts.
+	// ListContexts all the contexts.
 	listCmd := &cobra.Command{
 		Use:                   "list",
 		Aliases:               []string{"ls"},
@@ -99,7 +99,7 @@ func NewCmdImage(streams rio.Streams) *cobra.Command {
 		},
 	}
 
-	// Delete image from remote registry.
+	// DeleteContext image from remote registry.
 	delCmd := &cobra.Command{
 		Use:                   "delete",
 		Aliases:               []string{"d", "del"},
@@ -126,10 +126,14 @@ func (o *cmdImageOptions) listCmdRun(cmd *cobra.Command) error {
 		return err
 	}
 
-	// Get current registry.
-	current, err := o.Current()
+	// GetContext current registry.
+	current, err := o.CurrentContext()
 	if err != nil {
 		return err
+	}
+
+	if current == nil {
+		return errors.New("context is not set, please set current context with 'regi ctx set <name>' first")
 	}
 
 	// Create REST client for accessing APIs.
@@ -222,8 +226,8 @@ func (o *cmdImageOptions) pullCmdRun(args []string) error {
 	name := args[0]
 	tag := args[1]
 
-	// Get current registry.
-	current, err := o.Current()
+	// GetContext current registry.
+	current, err := o.CurrentContext()
 	if err != nil {
 		return err
 	}
@@ -262,8 +266,8 @@ func (o *cmdImageOptions) pushCmdRun(args []string) error {
 	name := args[0]
 	tag := args[1]
 
-	// Get current registry.
-	current, err := o.Current()
+	// GetContext current registry.
+	current, err := o.CurrentContext()
 	if err != nil {
 		return err
 	}
@@ -317,8 +321,8 @@ func (o *cmdImageOptions) delCmdRun(args []string) error {
 	name := args[0]
 	tag := args[1]
 
-	// Get current registry.
-	current, err := o.Current()
+	// GetContext current registry.
+	current, err := o.CurrentContext()
 	if err != nil {
 		return err
 	}
@@ -348,7 +352,7 @@ func (o *cmdImageOptions) delCmdRun(args []string) error {
 	}
 
 	// Second, we delete that image using the obtained manifest digest.
-	// In most cases, digest can be obtained by resp.Header.Get("Docker-Content-Digest").
+	// In most cases, digest can be obtained by resp.Header.GetContext("Docker-Content-Digest").
 	digest := resp.Header.Get("Docker-Content-Digest")
 	cliConfig = &rest.ClientConfig{
 		Host:    current.Server,

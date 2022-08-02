@@ -44,7 +44,7 @@ func NewClient(cfg *ClientConfig) (*Client, error) {
 		return nil, err
 	}
 
-	// Set client timeout.
+	// SetCurrentContext client timeout.
 	client = &http.Client{}
 	client.Timeout = time.Second * 2
 

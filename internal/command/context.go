@@ -14,30 +14,33 @@ const (
 
 	// msgExamplesCtxCmd is the example description for context root command.
 	msgExamplesCtxCmd = `
-  # Get all the contexts.
+  # GetContext all the contexts.
   regi context list
 
-  # Set current context.
+  # SetCurrentContext current context.
   regi context set <context-name>
 
   # Add new context
   regi context add -n=context1 -s=192.168.0.168:5000
 
-  # Get context info
+  # GetContext context info
   regi context get context1
 `
 
 	// msgShortCtxListCmd is the short version description for `context list` command.
-	msgShortCtxListCmd = "List all the contexts."
+	msgShortCtxListCmd = "ListContexts all the contexts."
 
 	// msgShortCtxSetCmd is the short version description for `context set` command.
-	msgShortCtxSetCmd = "Set current context with context name."
+	msgShortCtxSetCmd = "SetCurrentContext current context with context name."
 
 	// msgShortCtxAddCmd is the short version description for `context add` command.
 	msgShortCtxAddCmd = "Add a new context."
 
 	// msgShortCtxGetCmd is the short version description for `context add` command.
-	msgShortCtxGetCmd = "Get context info given context name."
+	msgShortCtxGetCmd = "GetContext context info given context name."
+
+	// msgShortCtxDelCmd is the short version description for `context delete` command.
+	msgShortCtxDelCmd = "DeleteContext context given context name."
 )
 
 // CmdContextOptions eases access to storage and console io.
@@ -74,7 +77,7 @@ func NewCmdContext(streams io.Streams) *cobra.Command {
 		Example:               msgExamplesCtxCmd,
 	}
 
-	// List all the contexts.
+	// ListContexts all the contexts.
 	listCmd := &cobra.Command{
 		Use:                   "list",
 		Aliases:               []string{"ls"},
@@ -85,7 +88,7 @@ func NewCmdContext(streams io.Streams) *cobra.Command {
 		},
 	}
 
-	// Set current context.
+	// SetCurrentContext current context.
 	setCmd := &cobra.Command{
 		Use:                   "set",
 		DisableFlagsInUseLine: true,
@@ -105,7 +108,7 @@ func NewCmdContext(streams io.Streams) *cobra.Command {
 		},
 	}
 
-	// Get context info.
+	// GetContext context info.
 	getCmd := &cobra.Command{
 		Use:                   "get",
 		DisableFlagsInUseLine: true,
@@ -115,11 +118,23 @@ func NewCmdContext(streams io.Streams) *cobra.Command {
 		},
 	}
 
+	// DeleteContext context.
+	delCmd := &cobra.Command{
+		Use:                   "delete",
+		Aliases:               []string{"del", "d"},
+		DisableFlagsInUseLine: true,
+		Short:                 msgShortCtxDelCmd,
+		Run: func(cmd *cobra.Command, args []string) {
+			cobra.CheckErr(o.deleteCmdRun(cmd, args))
+		},
+	}
+
 	// Add commands.
 	cmd.AddCommand(listCmd)
 	cmd.AddCommand(setCmd)
 	cmd.AddCommand(addCmd)
 	cmd.AddCommand(getCmd)
+	cmd.AddCommand(delCmd)
 
 	// Add flags.
 	addCmd.Flags().StringP("name", "n", "", "context name (required)")
@@ -128,7 +143,7 @@ func NewCmdContext(streams io.Streams) *cobra.Command {
 	addCmd.Flags().StringP("user", "u", "", "registry username")
 	addCmd.Flags().StringP("password", "p", "", "registry password")
 
-	// Set required options.
+	// SetCurrentContext required options.
 	addCmd.MarkFlagRequired("name")
 	addCmd.MarkFlagRequired("server")
 
@@ -137,14 +152,14 @@ func NewCmdContext(streams io.Streams) *cobra.Command {
 
 // listCmdRun lists all the registries.
 func (o *cmdContextOptions) listCmdRun() error {
-	// Get current registry.
-	current, err := o.Current()
+	// GetContext current registry.
+	current, err := o.CurrentContext()
 	if err != nil {
 		return err
 	}
 
-	// Get all cached registries.
-	registries, err := o.DB.List()
+	// GetContext all cached registries.
+	registries, err := o.DB.ListContexts()
 	if err != nil {
 		return err
 	}
@@ -158,8 +173,8 @@ func (o *cmdContextOptions) listCmdRun() error {
 
 	for _, v := range registries {
 		hl := ""
-		// Point out the current context.
-		if v.Name == current.Name {
+		// Point out the current context if it has been set before.
+		if current != nil && v.Name == current.Name {
 			hl = " <---"
 		}
 		o.Out.Write([]byte(fmt.Sprintf("- %s%s\n", v.Name, hl)))
@@ -177,8 +192,9 @@ func (o *cmdContextOptions) setCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	name := args[0]
+
 	// Check against cache registries. If the given name does not match any entries, return an error.
-	reg, err := o.Get(name)
+	reg, err := o.GetContext(name)
 	if err != nil {
 		return err
 	}
@@ -188,12 +204,12 @@ func (o *cmdContextOptions) setCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Otherwise, set current context to the given name.
-	err = o.Set(name)
+	err = o.SetCurrentContext(name)
 	if err != nil {
 		return err
 	}
 
-	o.Out.Write([]byte(fmt.Sprintf("Context switched. Current context: %s\n", args[0])))
+	o.Out.Write([]byte(fmt.Sprintf("Context switched. CurrentContext context: %s\n", args[0])))
 
 	return nil
 }
@@ -208,7 +224,7 @@ func (o *cmdContextOptions) getCmdRun(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check against cache registries. If the given name does not match any entries, return an error.
-	reg, err := o.DB.Get(ctxName)
+	reg, err := o.DB.GetContext(ctxName)
 	if err != nil {
 		return err
 	}
@@ -276,5 +292,36 @@ func (o *cmdContextOptions) addCmdRun(cmd *cobra.Command) error {
 - user: %s
 - password: ***
 `, name, server, verify, user)))
+	return nil
+}
+
+// deleteCmdRun delete current.
+func (o *cmdContextOptions) deleteCmdRun(cmd *cobra.Command, args []string) error {
+	tips := fmt.Sprintf(">> tips：please use '%s -h' to get for information about the command.", cmd.CommandPath())
+
+	if len(args) == 0 {
+		return errors.Errorf("context name is missing\n%s", tips)
+	}
+
+	name := args[0]
+	// Check this deleting one against the current context.
+	current, err := o.CurrentContext()
+	if err != nil {
+		return err
+	}
+
+	// DeleteContext context
+	err = o.DB.DeleteContext(name)
+	if err != nil {
+		return err
+	}
+
+	// If the deleting one is the current context, the current one is set to be empty.
+	if current != nil && current.Name == name {
+		o.DB.SetCurrentContext("")
+	}
+
+	o.Out.Write([]byte(fmt.Sprintf("Context %s has been deleted\n", name)))
+
 	return nil
 }

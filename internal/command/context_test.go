@@ -16,15 +16,15 @@ func TestCmdContext(t *testing.T) {
 	_, err := executeCommand(ctxCmd, "add", "-n=context-123", "-s=http://localhost:5000", "-u=regi", "-p=regi")
 	assert.NoError(t, err)
 
-	// Set test.
+	// SetCurrentContext test.
 	_, err = executeCommand(ctxCmd, "set", "context-123")
 	assert.NoError(t, err)
 
-	// List test.
+	// ListContexts test.
 	_, err = executeCommand(ctxCmd, "list")
 	assert.NoError(t, err)
 
-	// Get test.
+	// GetContext test.
 	_, err = executeCommand(ctxCmd, "get", "context-123")
 	assert.NoError(t, err)
 

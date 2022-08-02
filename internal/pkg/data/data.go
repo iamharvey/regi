@@ -41,42 +41,43 @@ type Registry struct {
 	Password              string
 }
 
-// Current returns the current registry setting.
-func (db *DB) Current() (*Registry, error) {
-	// Get current context.
+// CurrentContext returns the current registry setting.
+func (db *DB) CurrentContext() (*Registry, error) {
+	// GetContext current context.
 	keyPath, err := db.GetPath(keyCurrent)
 	if err != nil {
 		return nil, err
 	}
-	current := keyPath.(string)
 
-	// Get all the contexts.
-	keyPath, err = db.GetPath(keyRegistries)
+	var current string
+	if keyPath == nil {
+		return nil, nil
+	}
+	current = keyPath.(string)
+	if len(current) == 0 {
+		return nil, nil
+	}
+
+	// GetContext all the contexts.
+	regs, err := db.ListContexts()
 	if err != nil {
 		return nil, err
 	}
 
-	if keyPath == nil {
-		return nil, errors.New(
-			"registries is not specified, there must be something wrong about setting current context")
-	}
-	registries := keyPath.([]interface{})
-
-	for _, v := range registries {
-		r := v.(map[interface{}]interface{})
-		if r["name"] != nil && r["name"].(string) == current {
-			return packUp(r)
+	for _, v := range regs {
+		if v.Name == current {
+			return v, nil
 		}
 	}
 
 	return nil, errors.New("unable to find context, there must be something wrong about adding context")
 }
 
-// List returns all the registries.
-func (db *DB) List() ([]*Registry, error) {
+// ListContexts returns all the registries.
+func (db *DB) ListContexts() ([]*Registry, error) {
 	var registries []*Registry
 
-	// Get all the contexts.
+	// GetContext all the contexts.
 	keyPath, err := db.GetPath(keyRegistries)
 	if err != nil {
 		return nil, err
@@ -100,9 +101,9 @@ func (db *DB) List() ([]*Registry, error) {
 	return registries, nil
 }
 
-// Get a registry entry.
-func (db *DB) Get(name string) (*Registry, error) {
-	// Get all the contexts.
+// GetContext a registry entry.
+func (db *DB) GetContext(name string) (*Registry, error) {
+	// GetContext all the contexts.
 	keyPath, err := db.GetPath(keyRegistries)
 	if err != nil {
 		return nil, err
@@ -124,9 +125,32 @@ func (db *DB) Get(name string) (*Registry, error) {
 	return nil, nil
 }
 
-// Set current context.
-func (db *DB) Set(name string) error {
+// SetCurrentContext current context.
+func (db *DB) SetCurrentContext(name string) error {
 	return db.Upsert("current", name)
+}
+
+// DeleteContext context.
+func (db *DB) DeleteContext(name string) error {
+	// GetContext all the contexts.
+	regs, err := db.ListContexts()
+	if err != nil {
+		return errors.Errorf("unable to delete context[%s], %s", name, err.Error())
+	}
+
+	var newRegs []*Registry
+	for _, v := range regs {
+		if v.Name != name {
+			newRegs = append(newRegs, v)
+		}
+	}
+
+	err = db.Upsert(keyRegistries, newRegs)
+	if err != nil {
+		return errors.Errorf("unable to delete context[%s], %s", name, err.Error())
+	}
+
+	return nil
 }
 
 // Add new registry to the context list.

@@ -33,11 +33,11 @@ func TestCmdImage(t *testing.T) {
 	_, err = executeCommand(imgCmd, "pull", "hello-world", "latest")
 	assert.NoError(t, err)
 
-	// List.
+	// ListContexts.
 	_, err = executeCommand(imgCmd, "list", "withTag=true")
 	assert.NoError(t, err)
 
-	// Delete.
+	// DeleteContext.
 	_, err = executeCommand(imgCmd, "delete", "hello-world", "latest")
 	assert.NoError(t, err)
 

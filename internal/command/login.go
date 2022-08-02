@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/iamharvey/regi/internal/pkg/data"
 	"github.com/iamharvey/regi/internal/pkg/io"
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"os/exec"
 )
@@ -53,9 +54,13 @@ func NewCmdLogin(streams io.Streams) *cobra.Command {
 
 // loginCmdRun lists all the registries.
 func (o *cmdLoginOptions) loginCmdRun() error {
-	reg, err := o.Current()
+	reg, err := o.CurrentContext()
 	if err != nil {
 		return err
+	}
+
+	if reg == nil {
+		return errors.New("context is not set, please set current context with 'regi ctx set <name>' first")
 	}
 
 	o.Out.Write([]byte(fmt.Sprintf("\nConnecting Docker registry with current context [%s](%s)",

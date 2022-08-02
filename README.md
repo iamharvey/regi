@@ -19,7 +19,7 @@ Context management:
 - [x] Add a new context (new connection settings);
 - [x] Get info about a context;
 - [x] Set current context;
-- [ ] Remove context.
+- [x] Remove context.
 
 Login
 - [x] Login to current registry.
